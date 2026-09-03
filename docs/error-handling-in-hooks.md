@@ -8,11 +8,11 @@ This guide documents the standard pattern for handling API errors in React Query
 
 All HTTP requests go through the service layer (`src/services/`), which extends `BaseApiService`. The `handleError` method on that base class normalises every failure into an `ApiError` before it reaches the hook:
 
-| Raw failure | What you receive |
-|---|---|
-| HTTP response with an error status | `ApiError(message, httpStatus, responseBody)` |
+| Raw failure                           | What you receive                                       |
+| ------------------------------------- | ------------------------------------------------------ |
+| HTTP response with an error status    | `ApiError(message, httpStatus, responseBody)`          |
 | Request sent but no response received | `ApiError('Network error - check your connection', 0)` |
-| Unexpected non-HTTP exception | `ApiError(error.message, 500)` |
+| Unexpected non-HTTP exception         | `ApiError(error.message, 500)`                         |
 
 One important exception: **401 + `TOKEN_EXPIRED`** is handled transparently by the Axios interceptor in `BaseApiService`. The interceptor silently retries the original request after refreshing the access token. If the refresh also fails the user is redirected to `/login`; the hook never sees this error.
 
@@ -23,16 +23,16 @@ One important exception: **401 + `TOKEN_EXPIRED`** is handled transparently by t
 ```ts
 // src/services/api.service.ts
 class ApiError extends Error {
-  status: number;           // HTTP status code; 0 means no network response
-  response?: {
-    success: false;
-    message: string;
-    code?: string;           // machine-readable code from the API, e.g. "INSUFFICIENT_BALANCE"
-    errors?: Array<{
-      field?: string;        // present on 422 validation failures
-      message: string;
-    }>;
-  };
+	status: number; // HTTP status code; 0 means no network response
+	response?: {
+		success: false;
+		message: string;
+		code?: string; // machine-readable code from the API, e.g. "INSUFFICIENT_BALANCE"
+		errors?: Array<{
+			field?: string; // present on 422 validation failures
+			message: string;
+		}>;
+	};
 }
 ```
 
@@ -41,12 +41,12 @@ Always cast the error to `ApiError` before inspecting it:
 ```ts
 import { ApiError } from '@/services/api.service';
 
-onError: (error) => {
-  const apiError = error as ApiError;
-  console.log(apiError.status);      // 0, 400, 403, 422, 500 …
-  console.log(apiError.message);     // human-readable message from the API
-  console.log(apiError.response?.errors); // field-level details on 422
-}
+onError: error => {
+	const apiError = error as ApiError;
+	console.log(apiError.status); // 0, 400, 403, 422, 500 …
+	console.log(apiError.message); // human-readable message from the API
+	console.log(apiError.response?.errors); // field-level details on 422
+};
 ```
 
 ---
@@ -59,8 +59,8 @@ No response was received — the user is offline, the server is unreachable, or 
 
 ```ts
 if (apiError.status === 0) {
-  showToast.error('Network error. Check your connection and try again.');
-  return;
+	showToast.error('Network error. Check your connection and try again.');
+	return;
 }
 ```
 
@@ -68,14 +68,14 @@ if (apiError.status === 0) {
 
 The request was received but rejected because of something the client sent. The message from the API is usually safe to show to the user.
 
-| Status | Cause | Typical UI response |
-|---|---|---|
-| 400 | Malformed request | Toast with `apiError.message` |
-| 401 | Session expired | Auto-handled by the interceptor |
-| 403 | Insufficient permissions | Inline error or redirect |
-| 404 | Resource not found | Inline error state |
-| 422 | Validation failure | Inline field errors from `apiError.response?.errors` |
-| 429 | Rate limited | Toast with retry suggestion |
+| Status | Cause                    | Typical UI response                                  |
+| ------ | ------------------------ | ---------------------------------------------------- |
+| 400    | Malformed request        | Toast with `apiError.message`                        |
+| 401    | Session expired          | Auto-handled by the interceptor                      |
+| 403    | Insufficient permissions | Inline error or redirect                             |
+| 404    | Resource not found       | Inline error state                                   |
+| 422    | Validation failure       | Inline field errors from `apiError.response?.errors` |
+| 429    | Rate limited             | Toast with retry suggestion                          |
 
 ### 5xx — Server errors
 
@@ -83,8 +83,8 @@ The API itself failed. The user cannot fix the payload; they can only retry afte
 
 ```ts
 if (apiError.status >= 500) {
-  showToast.error('The server ran into a problem. Please try again shortly.');
-  return;
+	showToast.error('The server ran into a problem. Please try again shortly.');
+	return;
 }
 ```
 
@@ -99,10 +99,14 @@ if (apiError.status >= 500) {
 - The fix is to retry or change input: one line of feedback is enough.
 
 ```ts
-onError: (error) => {
-  const apiError = error as ApiError;
-  showToast.error(apiError.status >= 500 ? 'Something went wrong. Try again.' : apiError.message);
-}
+onError: error => {
+	const apiError = error as ApiError;
+	showToast.error(
+		apiError.status >= 500
+			? 'Something went wrong. Try again.'
+			: apiError.message
+	);
+};
 ```
 
 ### Use an inline error state when
@@ -115,14 +119,17 @@ onError: (error) => {
 const { data, isError, error } = useCreatorKeys(creatorId);
 
 if (isError) {
-  const apiError = error as ApiError;
-  return (
-    <div role="alert" className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
-      {apiError.status >= 500
-        ? 'Unable to load data. Please try again later.'
-        : apiError.message}
-    </div>
-  );
+	const apiError = error as ApiError;
+	return (
+		<div
+			role="alert"
+			className="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
+		>
+			{apiError.status >= 500
+				? 'Unable to load data. Please try again later.'
+				: apiError.message}
+		</div>
+	);
 }
 ```
 
@@ -136,8 +143,8 @@ if (isError) {
 import SectionErrorBoundary from '@/components/common/SectionErrorBoundary';
 
 <SectionErrorBoundary sectionName="creator keys">
-  <CreatorKeysSection creatorId={id} />
-</SectionErrorBoundary>
+	<CreatorKeysSection creatorId={id} />
+</SectionErrorBoundary>;
 ```
 
 `SectionErrorBoundary` renders a retry button that resets its own error state. Use it as a safety net around sections that fetch and render data together.
@@ -154,11 +161,11 @@ import { useQuery } from '@tanstack/react-query';
 import { creatorService } from '@/services/creator.service';
 
 export function useCreatorProfile(creatorId: string) {
-  return useQuery({
-    queryKey: ['creator-profile', creatorId],
-    queryFn: () => creatorService.getProfile(creatorId),
-    staleTime: 30_000,
-  });
+	return useQuery({
+		queryKey: ['creator-profile', creatorId],
+		queryFn: () => creatorService.getProfile(creatorId),
+		staleTime: 30_000,
+	});
 }
 ```
 
@@ -168,22 +175,22 @@ import { ApiError } from '@/services/api.service';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 
 function CreatorProfileSection({ creatorId }: { creatorId: string }) {
-  const { data, isLoading, isError, error } = useCreatorProfile(creatorId);
+	const { data, isLoading, isError, error } = useCreatorProfile(creatorId);
 
-  if (isLoading) return <ProfileSkeleton />;
+	if (isLoading) return <ProfileSkeleton />;
 
-  if (isError) {
-    const apiError = error as ApiError;
-    return (
-      <div role="alert" className="p-4 text-sm text-destructive">
-        {apiError.status >= 500
-          ? 'Unable to load this profile right now.'
-          : apiError.message}
-      </div>
-    );
-  }
+	if (isError) {
+		const apiError = error as ApiError;
+		return (
+			<div role="alert" className="p-4 text-sm text-destructive">
+				{apiError.status >= 500
+					? 'Unable to load this profile right now.'
+					: apiError.message}
+			</div>
+		);
+	}
 
-  return <ProfileCard profile={data} />;
+	return <ProfileCard profile={data} />;
 }
 ```
 
@@ -201,32 +208,36 @@ import { ApiError } from '@/services/api.service';
 import showToast from '@/utils/toast.util';
 
 export function useEnrollInCourse() {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (courseId: string) => courseService.enrollInCourse(courseId),
-    onError: (error) => {
-      const apiError = error as ApiError;
+	return useMutation({
+		mutationFn: (courseId: string) => courseService.enrollInCourse(courseId),
+		onError: error => {
+			const apiError = error as ApiError;
 
-      if (apiError.status === 0) {
-        showToast.error('Network error. Check your connection and try again.');
-        return;
-      }
+			if (apiError.status === 0) {
+				showToast.error(
+					'Network error. Check your connection and try again.'
+				);
+				return;
+			}
 
-      if (apiError.status >= 500) {
-        showToast.error('Something went wrong on our end. Please try again.');
-        return;
-      }
+			if (apiError.status >= 500) {
+				showToast.error(
+					'Something went wrong on our end. Please try again.'
+				);
+				return;
+			}
 
-      // 4xx: the API message is safe and actionable
-      showToast.error(apiError.message);
-    },
-    onSuccess: (_, courseId) => {
-      queryClient.invalidateQueries({ queryKey: ['enrolled-courses'] });
-      queryClient.invalidateQueries({ queryKey: ['course', courseId] });
-      showToast.success('Enrolled successfully!');
-    },
-  });
+			// 4xx: the API message is safe and actionable
+			showToast.error(apiError.message);
+		},
+		onSuccess: (_, courseId) => {
+			queryClient.invalidateQueries({ queryKey: ['enrolled-courses'] });
+			queryClient.invalidateQueries({ queryKey: ['course', courseId] });
+			showToast.success('Enrolled successfully!');
+		},
+	});
 }
 ```
 
@@ -245,53 +256,64 @@ import { creatorKeysService } from '@/services/creatorKeys.service';
 
 // --- Read ---
 export function useCreatorKeys(creatorId: string) {
-  return useQuery({
-    queryKey: ['creator-keys', creatorId],
-    queryFn: () => creatorKeysService.getKeys(creatorId),
-    staleTime: 30_000,
-  });
+	return useQuery({
+		queryKey: ['creator-keys', creatorId],
+		queryFn: () => creatorKeysService.getKeys(creatorId),
+		staleTime: 30_000,
+	});
 }
 
 // --- Write ---
 export function useBuyCreatorKey() {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ creatorId, amount }: { creatorId: string; amount: number }) =>
-      creatorKeysService.buyKey(creatorId, amount),
+	return useMutation({
+		mutationFn: ({
+			creatorId,
+			amount,
+		}: {
+			creatorId: string;
+			amount: number;
+		}) => creatorKeysService.buyKey(creatorId, amount),
 
-    onError: (error) => {
-      const apiError = error as ApiError;
+		onError: error => {
+			const apiError = error as ApiError;
 
-      // No response received — user is likely offline
-      if (apiError.status === 0) {
-        showToast.error('Network error. Check your connection and try again.');
-        return;
-      }
+			// No response received — user is likely offline
+			if (apiError.status === 0) {
+				showToast.error(
+					'Network error. Check your connection and try again.'
+				);
+				return;
+			}
 
-      // Server-side failure — not actionable by the user
-      if (apiError.status >= 500) {
-        showToast.error('The server ran into a problem. Please try again shortly.');
-        return;
-      }
+			// Server-side failure — not actionable by the user
+			if (apiError.status >= 500) {
+				showToast.error(
+					'The server ran into a problem. Please try again shortly.'
+				);
+				return;
+			}
 
-      // 422 Validation — show the first field error if available
-      if (apiError.status === 422 && apiError.response?.errors?.length) {
-        showToast.error(apiError.response.errors[0].message);
-        return;
-      }
+			// 422 Validation — show the first field error if available
+			if (apiError.status === 422 && apiError.response?.errors?.length) {
+				showToast.error(apiError.response.errors[0].message);
+				return;
+			}
 
-      // All other 4xx — the API message is safe to surface
-      showToast.error(apiError.message);
-    },
+			// All other 4xx — the API message is safe to surface
+			showToast.error(apiError.message);
+		},
 
-    onSuccess: (_, { creatorId }) => {
-      // Invalidate relevant queries so the UI reflects the purchase
-      queryClient.invalidateQueries({ queryKey: ['creator-keys', creatorId] });
-      queryClient.invalidateQueries({ queryKey: ['user-holdings'] });
-      showToast.success('Key purchased successfully!');
-    },
-  });
+		onSuccess: (_, { creatorId }) => {
+			// Invalidate relevant queries so the UI reflects the purchase
+			queryClient.invalidateQueries({
+				queryKey: ['creator-keys', creatorId],
+			});
+			queryClient.invalidateQueries({ queryKey: ['user-holdings'] });
+			showToast.success('Key purchased successfully!');
+		},
+	});
 }
 ```
 
@@ -303,34 +325,37 @@ import { useCreatorKeys, useBuyCreatorKey } from '@/hooks/useCreatorKeys';
 import SectionErrorBoundary from '@/components/common/SectionErrorBoundary';
 
 function CreatorKeysSection({ creatorId }: { creatorId: string }) {
-  const { data: keys, isLoading, isError, error } = useCreatorKeys(creatorId);
-  const { mutate: buyKey, isPending } = useBuyCreatorKey();
+	const { data: keys, isLoading, isError, error } = useCreatorKeys(creatorId);
+	const { mutate: buyKey, isPending } = useBuyCreatorKey();
 
-  if (isLoading) return <KeysSkeleton />;
+	if (isLoading) return <KeysSkeleton />;
 
-  if (isError) {
-    const apiError = error as ApiError;
-    return (
-      <div role="alert" className="rounded-xl border border-dashed p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          {apiError.status >= 500
-            ? 'Unable to load keys right now. Please try again later.'
-            : apiError.message}
-        </p>
-      </div>
-    );
-  }
+	if (isError) {
+		const apiError = error as ApiError;
+		return (
+			<div
+				role="alert"
+				className="rounded-xl border border-dashed p-8 text-center"
+			>
+				<p className="text-sm text-muted-foreground">
+					{apiError.status >= 500
+						? 'Unable to load keys right now. Please try again later.'
+						: apiError.message}
+				</p>
+			</div>
+		);
+	}
 
-  return (
-    // SectionErrorBoundary catches any render-time throws inside KeysList
-    <SectionErrorBoundary sectionName="creator keys">
-      <KeysList
-        keys={keys}
-        onBuy={(amount) => buyKey({ creatorId, amount })}
-        isBuying={isPending}
-      />
-    </SectionErrorBoundary>
-  );
+	return (
+		// SectionErrorBoundary catches any render-time throws inside KeysList
+		<SectionErrorBoundary sectionName="creator keys">
+			<KeysList
+				keys={keys}
+				onBuy={amount => buyKey({ creatorId, amount })}
+				isBuying={isPending}
+			/>
+		</SectionErrorBoundary>
+	);
 }
 ```
 
@@ -338,11 +363,11 @@ function CreatorKeysSection({ creatorId }: { creatorId: string }) {
 
 ## Quick Reference
 
-| Condition | Check | UI response |
-|---|---|---|
-| No network response | `apiError.status === 0` | Toast: "Network error. Check your connection." |
-| Server error | `apiError.status >= 500` | Toast: generic "something went wrong" message |
-| Validation failure | `apiError.status === 422` | Toast or inline: first item from `apiError.response?.errors` |
-| Other 4xx | `apiError.status >= 400` | Toast or inline: `apiError.message` (safe from the API) |
-| Read query fails | `isError === true` in component | Inline error state replacing the content area |
-| Render throws | Component boundary | Wrap with `<SectionErrorBoundary>` |
+| Condition           | Check                           | UI response                                                  |
+| ------------------- | ------------------------------- | ------------------------------------------------------------ |
+| No network response | `apiError.status === 0`         | Toast: "Network error. Check your connection."               |
+| Server error        | `apiError.status >= 500`        | Toast: generic "something went wrong" message                |
+| Validation failure  | `apiError.status === 422`       | Toast or inline: first item from `apiError.response?.errors` |
+| Other 4xx           | `apiError.status >= 400`        | Toast or inline: `apiError.message` (safe from the API)      |
+| Read query fails    | `isError === true` in component | Inline error state replacing the content area                |
+| Render throws       | Component boundary              | Wrap with `<SectionErrorBoundary>`                           |

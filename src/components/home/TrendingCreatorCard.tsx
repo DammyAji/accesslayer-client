@@ -4,6 +4,9 @@ import { Link } from 'react-router';
 import type { Course } from '@/services/course.service';
 
 type Props = { creator: Course & { walletAddress: string } };
+import { formatHolderCount } from '@/utils/numberFormat.utils';
+import { cn } from '@/lib/utils';
+import { creatorCardSubtitleClampClass } from '@/utils/lineClamp.utils';
 
 export default function TrendingCreatorCard({ creator }: Props) {
 	const name = creator.title || 'Unnamed creator';
@@ -32,7 +35,12 @@ export default function TrendingCreatorCard({ creator }: Props) {
 				</h3>
 
 				{creator.description && (
-					<p className="mt-2 line-clamp-2 font-jakarta text-xs leading-relaxed text-gray-500">
+					<p
+						className={cn(
+							'mt-2 font-jakarta text-xs leading-relaxed text-gray-500',
+							creatorCardSubtitleClampClass()
+						)}
+					>
 						{creator.description}
 					</p>
 				)}
@@ -49,7 +57,7 @@ export default function TrendingCreatorCard({ creator }: Props) {
 						<div className="flex items-center gap-1.5 text-gray-400">
 							<Users className="size-3.5" />
 							<span className="font-mono text-[10px]">
-								{creator.creatorShareSupply.toLocaleString()}
+								{formatHolderCount(creator.creatorShareSupply)}
 							</span>
 						</div>
 					)}
@@ -64,6 +72,6 @@ export default function TrendingCreatorCard({ creator }: Props) {
 					<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
 				</Link>
 			</div>
-		</article>
+		</article> 
 	);
 }

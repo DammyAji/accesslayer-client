@@ -5,6 +5,7 @@ import {
 	formatFollowerCount,
 	formatHolderCount,
 	formatPercent,
+	bpsToPercent,
 } from '../numberFormat.utils';
 
 // ---------------------------------------------------------------------------
@@ -111,12 +112,18 @@ describe('formatNumber: Full Value Display for Tooltips', () => {
 // ---------------------------------------------------------------------------
 describe('formatCompactNumber: Configurable precision', () => {
 	it('respects maximumFractionDigits option', () => {
-		expect(formatCompactNumber(1234, { maximumFractionDigits: 0 })).toBe('1K');
-		expect(formatCompactNumber(1234, { maximumFractionDigits: 2 })).toBe('1.23K');
+		expect(formatCompactNumber(1234, { maximumFractionDigits: 0 })).toBe(
+			'1K'
+		);
+		expect(formatCompactNumber(1234, { maximumFractionDigits: 2 })).toBe(
+			'1.23K'
+		);
 	});
 
 	it('respects minimumFractionDigits option', () => {
-		expect(formatCompactNumber(1000000, { minimumFractionDigits: 2 })).toBe('1.00M');
+		expect(formatCompactNumber(1000000, { minimumFractionDigits: 2 })).toBe(
+			'1.00M'
+		);
 	});
 });
 
@@ -240,5 +247,31 @@ describe('Integration: Compact display with full tooltip pattern', () => {
 
 		expect(displayValue).toBe('42');
 		expect(tooltipValue).toBe('42');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Feature: Bps to Percent formatting
+// ---------------------------------------------------------------------------
+describe('bpsToPercent: Basis points to percentage formatting', () => {
+	it('converts 500 bps to "5%"', () => {
+		expect(bpsToPercent(500)).toBe('5%');
+	});
+
+	it('converts 250 bps to "2.5%"', () => {
+		expect(bpsToPercent(250)).toBe('2.5%');
+	});
+
+	it('converts 0 bps to "0%"', () => {
+		expect(bpsToPercent(0)).toBe('0%');
+	});
+
+	it('returns placeholder "—" for null or undefined', () => {
+		expect(bpsToPercent(null)).toBe('—');
+		expect(bpsToPercent(undefined)).toBe('—');
+	});
+
+	it('returns custom placeholder when provided', () => {
+		expect(bpsToPercent(null, { emptyPlaceholder: 'N/A' })).toBe('N/A');
 	});
 });

@@ -5,6 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import LandingPage from '@/pages/LandingPage';
 import { courseService, type Course } from '@/services/course.service';
 
+vi.mock('@/hooks/useWallet', () => ({
+	useTradeMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
+	useWalletHoldings: () => ({ data: [] }),
+}));
+
 vi.mock('@/services/course.service', () => ({
 	courseService: {
 		getCourses: vi.fn(),

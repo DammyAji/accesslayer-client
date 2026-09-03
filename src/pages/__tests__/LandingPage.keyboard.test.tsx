@@ -98,8 +98,14 @@ const mockMatchMedia = () => {
 	});
 };
 
+import { MemoryRouter } from 'react-router';
+
 const renderLandingPage = async () => {
-	render(<LandingPage />);
+	render(
+		<MemoryRouter>
+			<LandingPage />
+		</MemoryRouter>
+	);
 	await waitFor(() => expect(mockGetCourses).toHaveBeenCalledTimes(1));
 };
 

@@ -39,20 +39,20 @@ Validation lives in [`src/utils/env.utils.ts`](./src/utils/env.utils.ts).
 
 ### Required (defaults provided)
 
-| Variable | Description |
-| --- | --- |
-| `VITE_BACKEND_URL` | Base URL for the backend API. Point this at your local backend during development (e.g. `http://localhost:3000/api/v1`). |
-| `VITE_DEFAULT_CHAIN_ID` | Chain ID selected by default on load. `84532` is Base Sepolia, the recommended testnet. |
-| `VITE_ANVIL_RPC_URL` | RPC URL for a local [Anvil](https://book.getfoundry.sh/anvil/) node (chain `31337`), used when developing against a local chain. |
-| `VITE_BASE_SEPOLIA_RPC_URL` | RPC URL for the Base Sepolia testnet (chain `84532`). The public default `https://sepolia.base.org` works without an account. |
+| Variable                    | Description                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_BACKEND_URL`          | Base URL for the backend API. Point this at your local backend during development (e.g. `http://localhost:3000/api/v1`).         |
+| `VITE_DEFAULT_CHAIN_ID`     | Chain ID selected by default on load. `84532` is Base Sepolia, the recommended testnet.                                          |
+| `VITE_ANVIL_RPC_URL`        | RPC URL for a local [Anvil](https://book.getfoundry.sh/anvil/) node (chain `31337`), used when developing against a local chain. |
+| `VITE_BASE_SEPOLIA_RPC_URL` | RPC URL for the Base Sepolia testnet (chain `84532`). The public default `https://sepolia.base.org` works without an account.    |
 
 ### Optional
 
-| Variable | Description |
-| --- | --- |
-| `VITE_SEPOLIA_RPC_URL` | RPC URL for the Ethereum Sepolia testnet (chain `11155111`). Only needed when testing on Sepolia. |
-| `VITE_MAINNET_RPC_URL` | RPC URL for Ethereum mainnet (chain `1`). Only needed when testing against mainnet. |
-| `VITE_UTM_SOURCE`, `VITE_UTM_MEDIUM`, `VITE_UTM_CAMPAIGN`, `VITE_UTM_TERM`, `VITE_UTM_CONTENT` | UTM parameters appended to shared profile links. Leave blank to disable UTM tracking. |
+| Variable                                                                                       | Description                                                                                       |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `VITE_SEPOLIA_RPC_URL`                                                                         | RPC URL for the Ethereum Sepolia testnet (chain `11155111`). Only needed when testing on Sepolia. |
+| `VITE_MAINNET_RPC_URL`                                                                         | RPC URL for Ethereum mainnet (chain `1`). Only needed when testing against mainnet.               |
+| `VITE_UTM_SOURCE`, `VITE_UTM_MEDIUM`, `VITE_UTM_CAMPAIGN`, `VITE_UTM_TERM`, `VITE_UTM_CONTENT` | UTM parameters appended to shared profile links. Leave blank to disable UTM tracking.             |
 
 ### Where to get testnet RPC URLs
 
@@ -92,14 +92,15 @@ The repository also uses Husky plus `lint-staged` to run lightweight checks on s
 - Prefer accessible, keyboard-friendly UI behavior.
 - Keep new routes focused and incremental until the main marketplace flows land.
 - See [docs/adding-page-routes.md](./docs/adding-page-routes.md) for how to register a new page, the file naming convention, and the recommended pattern for auth-protected routes.
+- Non-technical contributors can edit marketing page copy without a local setup — see [docs/marketing-page-copy.md](./docs/marketing-page-copy.md).
 
 ### Folder structure
 
 - `pages/`: Route-level components (each file maps to a route)
 - `components/`: Reusable UI components and shared component logic
-  - `components/common/`: Application-specific reusable components
-  - `components/ui/`: Low-level UI primitives (from shadcn/ui or similar)
-  - `components/home/`: Home/landing-page specific components
+   - `components/common/`: Application-specific reusable components
+   - `components/ui/`: Low-level UI primitives (from shadcn/ui or similar)
+   - `components/home/`: Home/landing-page specific components
 - `hooks/`: Custom React hooks
 - `utils/` or `lib/`: Pure helper functions and utilities
 - `constants/`: Application constants
@@ -116,15 +117,18 @@ The repository also uses Husky plus `lint-staged` to run lightweight checks on s
 ### Components vs pages: decision guide
 
 Use `pages/` when:
+
 - The component is a top-level route or page entry point
 - It represents a distinct URL path in the application
 
 Use `components/` when:
+
 - The component is reusable across multiple pages or routes
 - It's a self-contained UI piece with a single responsibility
 - It can be tested independently of route context
 
 Keep components co-located in a page file only when:
+
 - They are used exclusively within that single page
 - They are small, helper components that don't make sense outside the page context
 - Extracting them would add unnecessary indirection

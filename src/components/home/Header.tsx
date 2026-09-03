@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Moon, Sun, Monitor } from 'lucide-react';
+import WalletStatusChip from '@/components/common/WalletStatusChip';
+import NotificationBell from '@/components/common/NotificationBell';
+import MarketplaceHeaderSearch from '@/components/common/MarketplaceHeaderSearch';
+import { useProfileStore } from '@/hooks/useProfileStore';
+import { useTheme } from '@/hooks/useTheme';
 import { Link } from 'react-router';
+import BatchBuyModal from '@/components/common/BatchBuyModal';
 
 const navLinks = [
 	{ label: 'Marketplace', href: '/marketplace', external: false },
@@ -9,6 +16,9 @@ const navLinks = [
 
 export default function Header() {
 	const [scrolled, setScrolled] = useState(false);
+	const [batchOpen, setBatchOpen] = useState(false);
+	const profile = useProfileStore(state => state.profile);
+	const { theme, toggleTheme } = useTheme();
 
 	useEffect(() => {
 		const onScroll = () => {
@@ -27,9 +37,9 @@ export default function Header() {
 					: 'top-2'
 			}`}
 		>
-			<div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+			<div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
 				{/* Logo */}
-				<Link to="/" className="flex items-center gap-2.5">
+				<Link to="/" className="flex items-center gap-2.5 shrink-0">
 					<img
 						src="/icons/logo.svg"
 						alt="Access Layer"
@@ -41,7 +51,7 @@ export default function Header() {
 				</Link>
 
 				{/* Nav */}
-				<nav className="hidden items-center gap-8 md:flex">
+				<nav className="hidden items-center gap-8 md:flex shrink-0">
 					{navLinks.map(link =>
 						link.external ? (
 							<a
@@ -65,17 +75,48 @@ export default function Header() {
 					)}
 				</nav>
 
-				{/* CTA */}
-				<Link
-					to="/connect"
-					className={`rounded-sm px-5 py-2 font-mono text-[10px] uppercase tracking-wider transition-all duration-300 ${
+				{/* Marketplace Header Search */}
+				<div className="flex-1 max-w-xs mx-2">
+					<MarketplaceHeaderSearch />
+				</div>
+
+				{/* Right-side actions: dark mode toggle (#750) + notification bell (#720) + wallet status chip (#686).
+				    NotificationBell is only rendered when a user profile is available. */}
+				<div className="flex items-center gap-2 shrink-0">
+					<button
+						type="button"
+						onClick={() => setBatchOpen(true)}
+						className={`rounded-xl border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 ${scrolled ? '' : ''}`}
+					>
+						Batch Buy
+					</button>
+					<BatchBuyModal open={batchOpen} onOpenChange={setBatchOpen} />
+				<button
+					type="button"
+					onClick={toggleTheme}
+					aria-label={`Current theme: ${theme}. Click to cycle themes.`}
+					className={`rounded-md p-1.5 transition-colors duration-200 ${
 						scrolled
-							? 'border border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-900 hover:bg-gray-900 hover:text-white'
-							: 'border border-white/15 bg-white/[0.05] text-white/60 hover:border-white/30 hover:bg-white/[0.09] hover:text-white'
+							? 'text-gray-600 hover:bg-black/5 hover:text-gray-900'
+							: 'text-white/60 hover:text-white/90'
 					}`}
 				>
-					Connect Wallet
-				</Link>
+					{theme === 'dark' && <Sun className="size-4" aria-hidden="true" />}
+					{theme === 'light' && <Moon className="size-4" aria-hidden="true" />}
+					{theme === 'system' && <Monitor className="size-4" aria-hidden="true" />}
+				</button>
+					{profile && (
+						<NotificationBell
+							userId={profile.id}
+							className={
+								scrolled
+									? 'text-gray-600 hover:bg-black/5 hover:text-gray-900'
+									: ''
+							}
+						/>
+					)}
+					<WalletStatusChip />
+				</div>
 			</div>
 		</header>
 	);

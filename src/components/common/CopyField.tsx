@@ -5,6 +5,7 @@ import { useAutoSelectOnFocus } from '@/hooks/useAutoSelectOnFocus';
 import CopySuccessAnnouncement from '@/components/common/CopySuccessAnnouncement';
 import { useCopySuccessAnnouncement } from '@/hooks/useCopySuccessAnnouncement';
 import showToast from '@/utils/toast.util';
+import { copyTextToClipboard } from '@/utils/clipboard.utils';
 
 interface CopyFieldProps {
 	value: string;
@@ -26,16 +27,17 @@ const CopyField: React.FC<CopyFieldProps> = ({
 	const { announcement, announceCopySuccess } = useCopySuccessAnnouncement();
 
 	const handleCopy = async () => {
-    try {
-        await navigator.clipboard.writeText(value);
-        announceCopySuccess(`${label} copied.`);
-        showToast.success('Address copied to clipboard', { duration: 2000 });
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    } catch {
-        setCopied(false);
-    }
-};
+		try {
+			await copyTextToClipboard(value);
+			announceCopySuccess(`${label} copied.`);
+			showToast.success('Address copied to clipboard', { duration: 2000 });
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			setCopied(false);
+			showToast.error(`Could not copy ${label}. Please copy it manually.`);
+		}
+	};
 
 	return (
 		<div className={cn('flex items-center gap-2', className)}>

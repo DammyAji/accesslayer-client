@@ -30,6 +30,9 @@ The client is responsible for:
 - `Ctrl/Cmd + Alt + R` refreshes creator list data from the marketplace
   page. The shortcut is ignored while focus is inside text inputs,
   textareas, selects, or editable text regions.
+- `T` opens the trade panel from the creator profile page. The shortcut is
+  ignored while focus is inside text inputs, textareas, selects, or
+  editable text regions.
 
 ## Local setup
 
@@ -37,6 +40,10 @@ The client is responsible for:
 pnpm install
 pnpm dev
 ```
+
+## Environment variables
+
+See [docs/environment-variables.md](./docs/environment-variables.md).
 
 ## Verification
 

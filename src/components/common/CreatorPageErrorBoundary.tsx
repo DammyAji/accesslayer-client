@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ApiError } from '@/services/api.service';
 
 interface Props {
 	children: ReactNode;
@@ -9,6 +10,7 @@ interface Props {
 
 interface State {
 	hasError: boolean;
+	error: Error | null;
 }
 
 /**
@@ -19,10 +21,11 @@ interface State {
 class CreatorPageErrorBoundary extends Component<Props, State> {
 	public state: State = {
 		hasError: false,
+		error: null,
 	};
 
-	public static getDerivedStateFromError(): State {
-		return { hasError: true };
+	public static getDerivedStateFromError(error: Error): State {
+		return { hasError: true, error };
 	}
 
 	public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -33,6 +36,10 @@ class CreatorPageErrorBoundary extends Component<Props, State> {
 
 	public render() {
 		if (this.state.hasError) {
+			const isNotFound =
+				this.state.error instanceof ApiError &&
+				this.state.error.status === 404;
+
 			return (
 				<main
 					className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#06111f] px-6 py-16 text-center text-white"
@@ -42,11 +49,14 @@ class CreatorPageErrorBoundary extends Component<Props, State> {
 					<div className="flex flex-col items-center gap-3">
 						<AlertCircle className="size-10 text-amber-400" aria-hidden="true" />
 						<h1 className="font-grotesque text-3xl font-black tracking-tight sm:text-4xl">
-							This creator page could not load
+							{isNotFound
+								? 'Creator not found'
+								: 'This creator page could not load'}
 						</h1>
 						<p className="max-w-md font-jakarta text-base leading-7 text-white/70">
-							Something went wrong while loading this creator. The rest of the
-							marketplace is still available.
+							{isNotFound
+								? "We couldn't find a creator with that ID. Return to the creator list to keep browsing."
+								: 'Something went wrong while loading this creator. The rest of the marketplace is still available.'}
 						</p>
 					</div>
 					<Button

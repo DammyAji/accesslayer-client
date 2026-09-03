@@ -46,6 +46,20 @@ export function formatCompactNumber(
 }
 
 /**
+ * Formats an XLM price with two decimal places.
+ */
+export function formatXlmPrice(value: number | null | undefined): string {
+	if (value == null || !Number.isFinite(value)) return '0.00 XLM';
+	const formatted = new Intl.NumberFormat('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+		useGrouping: false,
+	}).format(value);
+	return `${formatted} XLM`;
+}
+
+
+/**
  * Formats holder counts for compact display across creator profile surfaces.
  *
  * - Below 1,000: plain string (e.g. `999`)
@@ -113,3 +127,15 @@ export function formatPercent(
 	return `${sign}${formatted}%`;
 }
 
+/**
+ * Converts basis points (bps) to a percentage string (e.g. 500 -> "5%", 250 -> "2.5%").
+ */
+export function bpsToPercent(
+	bps: number | null | undefined,
+	options: FormatPercentOptions = {}
+): string {
+	if (bps == null || !Number.isFinite(bps)) {
+		return options.emptyPlaceholder ?? '—';
+	}
+	return formatPercent(bps / 100, options);
+}
